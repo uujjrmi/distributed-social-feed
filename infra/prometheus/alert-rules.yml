@@ -1,0 +1,27 @@
+groups:
+  - name: social-feed
+    rules:
+      - alert: ServiceDown
+        expr: up == 0
+        for: 20s
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.job }} is down"
+
+      - alert: HighErrorRate
+        expr: sum(rate(http_errors_total[1m])) by (service) > 5
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.service }} has elevated errors"
+
+      - alert: RedisErrors
+        expr: sum(rate(redis_errors_total[1m])) by (service) > 1
+        for: 20s
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.service }} is seeing Redis errors"
+

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Autonomic Feed Ops</title>
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Distributed Social Feed</p>
+          <h1>Autonomic Feed Ops</h1>
+        </div>
+        <div class="topbar-actions">
+          <div class="status-pill" id="globalStatus">
+            <span class="status-dot pending"></span>
+            <span>Connecting</span>
+          </div>
+          <button class="button ghost" id="refreshButton" type="button">
+            <span class="button-mark">R</span>
+            Refresh
+          </button>
+        </div>
+      </header>
+
+      <main class="dashboard">
+        <section class="hero-band" aria-labelledby="heroTitle">
+          <div class="hero-copy">
+            <p class="eyebrow">Self-healing reliability cockpit</p>
+            <h2 id="heroTitle">Keep the feed usable while the system repairs itself.</h2>
+          </div>
+          <div class="metric-strip" id="metricStrip"></div>
+        </section>
+
+        <section class="grid primary-grid">
+          <div class="panel service-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Live topology</p>
+                <h3>Service Mesh</h3>
+              </div>
+              <span class="panel-tag" id="meshTag">0 / 5 ready</span>
+            </div>
+            <div class="topology" id="serviceTopology"></div>
+          </div>
+
+          <div class="panel action-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Failure lab</p>
+                <h3>Recovery Controls</h3>
+              </div>
+              <span class="panel-tag">Local demo</span>
+            </div>
+            <div class="action-grid">
+              <button class="button primary" id="seedButton" type="button">
+                <span class="button-mark">S</span>
+                Seed Data
+              </button>
+              <button class="button" id="postButton" type="button">
+                <span class="button-mark">P</span>
+                Create Post
+              </button>
+              <button class="button warning" id="redisButton" type="button">
+                <span class="button-mark">R</span>
+                Redis Outage
+              </button>
+              <button class="button" id="trafficButton" type="button">
+                <span class="button-mark">T</span>
+                Feed Traffic
+              </button>
+              <button class="button danger" id="feedCrashButton" type="button">
+                <span class="button-mark">F</span>
+                Feed Crash
+              </button>
+              <button class="button success" id="recoverButton" type="button">
+                <span class="button-mark">C</span>
+                Recover
+              </button>
+            </div>
+            <div class="command-log" id="commandLog" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="grid secondary-grid">
+          <div class="panel feed-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Materialized timeline</p>
+                <h3>Feed Preview</h3>
+              </div>
+              <select class="select" id="userSelect" aria-label="Feed user"></select>
+            </div>
+            <div class="feed-list" id="feedList"></div>
+          </div>
+
+          <div class="panel incident-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Autonomous actions</p>
+                <h3>Incident Timeline</h3>
+              </div>
+              <span class="panel-tag" id="incidentTag">0 incidents</span>
+            </div>
+            <div class="incident-list" id="incidentList"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/assets/app.js"></script>
+  </body>
+</html>

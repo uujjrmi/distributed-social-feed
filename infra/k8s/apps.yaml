@@ -1,0 +1,318 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: social-feed
+spec:
+  ports:
+    - port: 8001
+  selector:
+    app: user-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: social-feed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: user-service
+          image: social-feed/user-service:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8001
+          env:
+            - name: PORT
+              value: "8001"
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: social-feed-config
+                  key: DATABASE_URL
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8001
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: post-service
+  namespace: social-feed
+spec:
+  ports:
+    - port: 8002
+  selector:
+    app: post-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: post-service
+  namespace: social-feed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: post-service
+  template:
+    metadata:
+      labels:
+        app: post-service
+    spec:
+      containers:
+        - name: post-service
+          image: social-feed/post-service:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8002
+          env:
+            - name: PORT
+              value: "8002"
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: social-feed-config
+                  key: GO_DATABASE_URL
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: social-feed-config
+                  key: KAFKA_BROKERS
+            - name: POST_CREATED_TOPIC
+              valueFrom:
+                configMapKeyRef:
+                  name: social-feed-config
+                  key: POST_CREATED_TOPIC
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8002
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8002
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: feed-service
+  namespace: social-feed
+spec:
+  ports:
+    - port: 8003
+  selector:
+    app: feed-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feed-service
+  namespace: social-feed
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: feed-service
+  template:
+    metadata:
+      labels:
+        app: feed-service
+    spec:
+      containers:
+        - name: feed-service
+          image: social-feed/feed-service:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8003
+          env:
+            - name: PORT
+              value: "8003"
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: social-feed-config
+                  key: GO_DATABASE_URL
+            - name: REDIS_ADDR
+              valueFrom:
+                configMapKeyRef:
+                  name: social-feed-config
+                  key: REDIS_ADDR
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: social-feed-config
+                  key: KAFKA_BROKERS
+            - name: POST_CREATED_TOPIC
+              valueFrom:
+                configMapKeyRef:
+                  name: social-feed-config
+                  key: POST_CREATED_TOPIC
+            - name: CONSUMER_GROUP
+              value: feed-service
+            - name: ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: social-feed-secrets
+                  key: ADMIN_TOKEN
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8003
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8003
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: social-feed
+spec:
+  ports:
+    - port: 8004
+  selector:
+    app: notification-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: social-feed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+        - name: notification-service
+          image: social-feed/notification-service:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8004
+          env:
+            - name: PORT
+              value: "8004"
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: social-feed-config
+                  key: DATABASE_URL
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: social-feed-config
+                  key: KAFKA_BROKERS
+            - name: POST_CREATED_TOPIC
+              valueFrom:
+                configMapKeyRef:
+                  name: social-feed-config
+                  key: POST_CREATED_TOPIC
+            - name: CONSUMER_GROUP
+              value: notification-service
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8004
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8004
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: healing-agent
+  namespace: social-feed
+spec:
+  ports:
+    - port: 8005
+  selector:
+    app: healing-agent
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: healing-agent
+  namespace: social-feed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: healing-agent
+  template:
+    metadata:
+      labels:
+        app: healing-agent
+    spec:
+      serviceAccountName: healing-agent
+      containers:
+        - name: healing-agent
+          image: social-feed/healing-agent:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8005
+          env:
+            - name: PORT
+              value: "8005"
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: social-feed-config
+                  key: DATABASE_URL
+            - name: PROMETHEUS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: social-feed-config
+                  key: PROMETHEUS_URL
+            - name: RUNTIME_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: social-feed-config
+                  key: RUNTIME_MODE
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                configMapKeyRef:
+                  name: social-feed-config
+                  key: KUBERNETES_NAMESPACE
+            - name: FEED_ADMIN_URL
+              value: http://feed-service:8003
+            - name: ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: social-feed-secrets
+                  key: ADMIN_TOKEN
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8005
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8005
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: healing-agent
+  namespace: social-feed
+
