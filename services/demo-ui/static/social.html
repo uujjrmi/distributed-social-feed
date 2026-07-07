@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TimeScroll Demo</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/assets/styles.css" />
+    <link rel="stylesheet" href="/assets/experience.css" />
+  </head>
+  <body class="experience-body">
+    <div class="experience-shell">
+      <header class="experience-topbar">
+        <a class="brand-lockup" href="/social" aria-label="TimeScroll home">
+          <span class="brand-mark">T</span>
+          <span>
+            <span class="brand-name">TimeScroll</span>
+            <span class="brand-subtitle">history feed demo</span>
+          </span>
+        </a>
+        <nav class="experience-nav" aria-label="Demo views">
+          <a class="nav-chip active" href="/social">User App</a>
+          <a class="nav-chip" href="/compare">Compare</a>
+          <a class="nav-chip" href="/ops">Ops</a>
+          <a class="nav-chip" href="/lab">Scenario Lab</a>
+        </nav>
+        <div class="status-pill" id="socialStatus">
+          <span class="status-dot pending"></span>
+          <span>Loading</span>
+        </div>
+      </header>
+
+      <main class="social-layout">
+        <aside class="creator-rail">
+          <div class="section-head">
+            <p class="eyebrow">Creators</p>
+            <h2>Following</h2>
+          </div>
+          <div class="creator-list" id="creatorList"></div>
+        </aside>
+
+        <section class="feed-stage" aria-label="Mock social feed">
+          <div class="story-hero">
+            <img src="/assets/history-collage.png" alt="History feed collage" />
+            <div class="story-hero-copy">
+              <p class="eyebrow">For You</p>
+              <h1>Scroll history without feeling the backend.</h1>
+            </div>
+          </div>
+
+          <div class="composer-card">
+            <div class="avatar">U</div>
+            <div>
+              <p class="composer-title" id="composerName">Choose a creator</p>
+              <p class="composer-copy">Post a history thread into the distributed feed.</p>
+            </div>
+            <button class="button primary" id="postButton" type="button">
+              <span class="button-mark">P</span>
+              Post
+            </button>
+          </div>
+
+          <div class="feed-mode-banner" id="feedModeBanner"></div>
+          <div class="history-feed" id="historyFeed"></div>
+        </section>
+
+        <aside class="reliability-rail">
+          <div class="rail-card">
+            <div class="section-head compact">
+              <p class="eyebrow">Experience</p>
+              <h2>Live State</h2>
+            </div>
+            <div class="mini-metrics" id="miniMetrics"></div>
+          </div>
+
+          <div class="rail-card">
+            <div class="section-head compact">
+              <p class="eyebrow">Agent</p>
+              <h2>Timeline</h2>
+            </div>
+            <div class="agent-timeline" id="agentTimeline"></div>
+          </div>
+
+          <div class="rail-card">
+            <div class="section-head compact">
+              <p class="eyebrow">Demo Harness</p>
+              <h2>Break Things Elsewhere</h2>
+            </div>
+            <p class="rail-copy">
+              User-facing screens do not own outage controls. Use the neutral scenario lab to inject failures.
+            </p>
+            <a class="button ghost full-button" href="/lab">
+              <span class="button-mark">L</span>
+              Open Scenario Lab
+            </a>
+          </div>
+
+          <div class="rail-card">
+            <div class="section-head compact">
+              <p class="eyebrow">Notifications</p>
+              <h2 id="notificationCount">0</h2>
+            </div>
+            <div class="notification-list" id="notificationList"></div>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <script src="/assets/social.js"></script>
+  </body>
+</html>

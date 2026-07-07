@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Scenario Lab</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/assets/styles.css" />
+    <link rel="stylesheet" href="/assets/experience.css" />
+  </head>
+  <body class="experience-body">
+    <div class="experience-shell">
+      <header class="experience-topbar">
+        <a class="brand-lockup" href="/lab" aria-label="Scenario Lab home">
+          <span class="brand-mark">L</span>
+          <span>
+            <span class="brand-name">Scenario Lab</span>
+            <span class="brand-subtitle">neutral failure harness</span>
+          </span>
+        </a>
+        <nav class="experience-nav" aria-label="Demo views">
+          <a class="nav-chip" href="/social">User App</a>
+          <a class="nav-chip" href="/compare">Compare</a>
+          <a class="nav-chip" href="/ops">Ops</a>
+          <a class="nav-chip active" href="/lab">Scenario Lab</a>
+        </nav>
+        <div class="status-pill" id="labStatus">
+          <span class="status-dot pending"></span>
+          <span>Loading</span>
+        </div>
+      </header>
+
+      <main class="lab-shell">
+        <section class="lab-hero">
+          <div>
+            <p class="eyebrow">Outside the product</p>
+            <h1>Cause realistic failures, then watch the app and agent respond.</h1>
+          </div>
+          <div class="lab-next">
+            <a class="button primary" href="/compare">
+              <span class="button-mark">V</span>
+              Watch Compare
+            </a>
+            <a class="button" href="/social">
+              <span class="button-mark">U</span>
+              User App
+            </a>
+            <a class="button ghost" href="/ops">
+              <span class="button-mark">O</span>
+              Ops
+            </a>
+          </div>
+        </section>
+
+        <section class="lab-grid">
+          <div class="scenario-main">
+            <article class="scenario-panel">
+              <div class="section-head compact">
+                <p class="eyebrow">Setup</p>
+                <h2>Normal Activity</h2>
+              </div>
+              <div class="scenario-grid">
+                <button class="scenario-card setup" id="seedButton" type="button">
+                  <strong>Seed Social Graph</strong>
+                  <span>Create history creators, follows, posts, and notifications.</span>
+                </button>
+                <button class="scenario-card setup" id="postButton" type="button">
+                  <strong>Create Live Post</strong>
+                  <span>Publish a new post through the real post service and Kafka path.</span>
+                </button>
+                <button class="scenario-card setup" id="trafficButton" type="button">
+                  <strong>Generate Feed Traffic</strong>
+                  <span>Send feed reads so Prometheus has live behavior to measure.</span>
+                </button>
+              </div>
+            </article>
+
+            <article class="scenario-panel">
+              <div class="section-head compact">
+                <p class="eyebrow">Failure injection</p>
+                <h2>Break Something</h2>
+              </div>
+              <div class="scenario-grid">
+                <button class="scenario-card outage" id="redisButton" type="button">
+                  <strong>Redis Outage</strong>
+                  <span>Stop the feed cache and force the app into fallback behavior.</span>
+                </button>
+                <button class="scenario-card outage" id="feedCrashButton" type="button">
+                  <strong>Feed Service Crash</strong>
+                  <span>Stop the feed API so the agent can detect service unavailability.</span>
+                </button>
+                <button class="scenario-card outage" id="notificationCrashButton" type="button">
+                  <strong>Notification Crash</strong>
+                  <span>Stop the notification consumer to test service restart policies.</span>
+                </button>
+              </div>
+            </article>
+
+            <article class="scenario-panel">
+              <div class="section-head compact">
+                <p class="eyebrow">Cleanup</p>
+                <h2>Restore Demo</h2>
+              </div>
+              <div class="scenario-grid cleanup-grid">
+                <button class="scenario-card recover" id="recoverButton" type="button">
+                  <strong>Recover Services</strong>
+                  <span>Restart stopped services and turn off manual degraded mode.</span>
+                </button>
+                <button class="scenario-card reset" id="resetButton" type="button">
+                  <strong>Reset Incidents</strong>
+                  <span>Clear incident history and return the demo to a clean state.</span>
+                </button>
+              </div>
+            </article>
+          </div>
+
+          <aside class="lab-side">
+            <div class="rail-card">
+              <div class="section-head compact">
+                <p class="eyebrow">Current system</p>
+                <h2>Readiness</h2>
+              </div>
+              <div class="mini-metrics" id="labMetrics"></div>
+              <div class="service-mini-list" id="labServices"></div>
+            </div>
+
+            <div class="rail-card">
+              <div class="section-head compact">
+                <p class="eyebrow">Agent evidence</p>
+                <h2>Incidents</h2>
+              </div>
+              <div class="agent-timeline" id="labIncidents"></div>
+            </div>
+
+            <div class="rail-card">
+              <div class="section-head compact">
+                <p class="eyebrow">Lab log</p>
+                <h2>Actions</h2>
+              </div>
+              <pre class="lab-log" id="labLog" aria-live="polite"></pre>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+
+    <script src="/assets/lab.js"></script>
+  </body>
+</html>

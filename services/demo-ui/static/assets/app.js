@@ -32,7 +32,7 @@ const actionButtons = [
   els.feedCrashButton,
   els.recoverButton,
   els.resetButton,
-];
+].filter(Boolean);
 
 async function api(path, options = {}) {
   const response = await fetch(path, {
@@ -52,10 +52,13 @@ function setBusy(isBusy) {
   actionButtons.forEach((button) => {
     button.disabled = isBusy;
   });
-  els.refreshButton.disabled = isBusy;
+  if (els.refreshButton) {
+    els.refreshButton.disabled = isBusy;
+  }
 }
 
 function log(message) {
+  if (!els.commandLog) return;
   const stamp = new Date().toLocaleTimeString();
   els.commandLog.textContent = `[${stamp}] ${message}\n${els.commandLog.textContent}`.slice(0, 2400);
 }
@@ -267,13 +270,13 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-els.refreshButton.addEventListener("click", refresh);
-els.userSelect.addEventListener("change", () => {
+els.refreshButton?.addEventListener("click", refresh);
+els.userSelect?.addEventListener("change", () => {
   state.selectedUserId = els.userSelect.value;
   refreshFeed();
 });
-els.seedButton.addEventListener("click", () => runAction("seed data", "/api/actions/seed"));
-els.postButton.addEventListener("click", () =>
+els.seedButton?.addEventListener("click", () => runAction("seed data", "/api/actions/seed"));
+els.postButton?.addEventListener("click", () =>
   runAction("create post", "/api/actions/post", {
     body: JSON.stringify({
       author_id: state.selectedUserId,
@@ -281,11 +284,11 @@ els.postButton.addEventListener("click", () =>
     }),
   }),
 );
-els.redisButton.addEventListener("click", () => runAction("redis outage", "/api/actions/redis-outage"));
-els.trafficButton.addEventListener("click", () => runAction("feed traffic", "/api/actions/traffic"));
-els.feedCrashButton.addEventListener("click", () => runAction("feed crash", "/api/actions/feed-crash"));
-els.recoverButton.addEventListener("click", () => runAction("recover", "/api/actions/recover"));
-els.resetButton.addEventListener("click", () => runAction("reset demo", "/api/actions/reset-demo"));
+els.redisButton?.addEventListener("click", () => runAction("redis outage", "/api/actions/redis-outage"));
+els.trafficButton?.addEventListener("click", () => runAction("feed traffic", "/api/actions/traffic"));
+els.feedCrashButton?.addEventListener("click", () => runAction("feed crash", "/api/actions/feed-crash"));
+els.recoverButton?.addEventListener("click", () => runAction("recover", "/api/actions/recover"));
+els.resetButton?.addEventListener("click", () => runAction("reset demo", "/api/actions/reset-demo"));
 
 log("cockpit online");
 refresh();

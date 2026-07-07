@@ -2,9 +2,9 @@
 
 [![CI](https://github.com/uujjrmi/distributed-social-feed/actions/workflows/ci.yml/badge.svg)](https://github.com/uujjrmi/distributed-social-feed/actions/workflows/ci.yml)
 
-Distributed backend demo for a social feed with Kafka event streaming, Redis feed caching, Prometheus metrics, failure injection, an autonomous healing agent, and a live demo cockpit.
+Distributed backend demo for a social feed with Kafka event streaming, Redis feed caching, Prometheus metrics, autonomous recovery, a mock history social app, and a neutral failure-injection lab.
 
-![Autonomic Feed Ops demo cockpit](docs/assets/demo-cockpit.png)
+![TimeScroll reliability comparison](docs/assets/timescroll-compare-outage.png)
 
 ## Why This Exists
 
@@ -14,11 +14,22 @@ This project models a smaller social platform that keeps the feed usable during 
 
 ## What You Can Demo
 
+- Use TimeScroll, a mock history social app, to show the user-facing feed.
+- Compare the same Redis outage with and without self-healing.
 - Create users, follows, posts, feeds, and notifications through real services.
 - Materialize fanout feeds from Kafka events into Redis.
 - Stop Redis and continue serving feeds from Postgres fallback.
 - Watch the healing agent detect the Redis outage and enable degraded mode.
-- Recover services and clear demo controls from the UI.
+- Keep intentional outage controls separate in a neutral Scenario Lab.
+
+## Demo Surfaces
+
+| Surface | URL | Purpose |
+| --- | --- | --- |
+| TimeScroll User App | http://localhost:8080/social | Mock history social feed that represents what users experience. |
+| Reliability Compare | http://localhost:8080/compare | Side-by-side view of baseline failure versus self-healing fallback. |
+| Autonomic Feed Ops | http://localhost:8080/ops | Operator cockpit for service health, incidents, and recovery evidence. |
+| Scenario Lab | http://localhost:8080/lab | Neutral harness for seeding data, generating traffic, and injecting outages. |
 
 ## Services
 
@@ -29,7 +40,7 @@ This project models a smaller social platform that keeps the feed usable during 
 | Feed Service | 8003 | Redis-backed feed reads and Kafka fanout consumer |
 | Notification Service | 8004 | Notification consumer and API |
 | Healing Agent | 8005 | Metrics-driven incident detection and remediation |
-| Demo UI | 8080 | Live reliability cockpit and failure lab |
+| Demo UI | 8080 | User app, comparison view, ops cockpit, and scenario lab |
 | Prometheus | 9090 | Metrics store |
 | Grafana | 3000 | Optional dashboards |
 
@@ -40,13 +51,13 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Open the demo cockpit:
+Open the mock social app:
 
 ```text
-http://localhost:8080
+http://localhost:8080/social
 ```
 
-The UI includes live service health, social graph counts, feed preview, incident timeline, sample data generation, failure injection, feed traffic generation, and recovery controls.
+The UI includes a mock history feed, reliability comparison, live service health, incident timeline, sample data generation, failure injection, feed traffic generation, and recovery controls. Failure injection lives in the Scenario Lab rather than the Autonomic Feed Ops cockpit.
 
 For a guided recording flow:
 
@@ -80,7 +91,10 @@ Useful URLs:
 - Feed Service: http://localhost:8003/healthz
 - Notification Service: http://localhost:8004/docs
 - Healing Agent: http://localhost:8005/docs
-- Demo UI: http://localhost:8080
+- TimeScroll User App: http://localhost:8080/social
+- Reliability Compare: http://localhost:8080/compare
+- Autonomic Feed Ops: http://localhost:8080/ops
+- Scenario Lab: http://localhost:8080/lab
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3000
 
@@ -92,7 +106,7 @@ Grafana credentials default to `admin` / `admin`.
 make demo
 ```
 
-Or use the Demo UI at http://localhost:8080 to seed sample data, create posts, inject a Redis outage, generate feed traffic, and recover services.
+Or use the Scenario Lab at http://localhost:8080/lab to seed sample data, create posts, inject a Redis outage, generate feed traffic, and recover services. Keep http://localhost:8080/compare open to watch the product impact.
 
 For the latest local resilience run, see [docs/benchmark-results.md](docs/benchmark-results.md).
 

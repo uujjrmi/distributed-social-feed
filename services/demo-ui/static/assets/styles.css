@@ -315,6 +315,7 @@ select {
   background: var(--surface);
   color: var(--ink);
   font-weight: 780;
+  text-decoration: none;
   cursor: pointer;
   transition:
     transform 120ms ease,
@@ -359,6 +360,20 @@ select {
 
 .button.ghost {
   background: transparent;
+}
+
+.ops-copy {
+  padding: 20px 20px 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.ops-copy p {
+  margin: 0;
+}
+
+.nav-action-grid {
+  grid-template-columns: 1fr;
 }
 
 .button-mark {

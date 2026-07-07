@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TimeScroll Reliability Compare</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/assets/styles.css" />
+    <link rel="stylesheet" href="/assets/experience.css" />
+  </head>
+  <body class="experience-body compare-body">
+    <div class="experience-shell">
+      <header class="experience-topbar">
+        <a class="brand-lockup" href="/social" aria-label="TimeScroll home">
+          <span class="brand-mark">T</span>
+          <span>
+            <span class="brand-name">TimeScroll</span>
+            <span class="brand-subtitle">reliability comparison</span>
+          </span>
+        </a>
+        <nav class="experience-nav" aria-label="Demo views">
+          <a class="nav-chip" href="/social">User App</a>
+          <a class="nav-chip active" href="/compare">Compare</a>
+          <a class="nav-chip" href="/ops">Ops</a>
+          <a class="nav-chip" href="/lab">Scenario Lab</a>
+        </nav>
+        <div class="status-pill" id="compareStatus">
+          <span class="status-dot pending"></span>
+          <span>Loading</span>
+        </div>
+      </header>
+
+      <main class="compare-shell">
+        <section class="compare-hero">
+          <div>
+            <p class="eyebrow">Same outage, different product feel</p>
+            <h1>Show the user experience before and after self-healing.</h1>
+          </div>
+          <div class="compare-controls">
+            <select class="select" id="userSelect" aria-label="Feed user"></select>
+            <button class="button ghost" id="refreshButton" type="button">
+              <span class="button-mark">R</span>
+              Refresh
+            </button>
+            <a class="button warning" href="/lab">
+              <span class="button-mark">L</span>
+              Scenario Lab
+            </a>
+          </div>
+        </section>
+
+        <section class="compare-grid" aria-label="Reliability comparison">
+          <article class="experience-panel baseline-panel">
+            <div class="panel-heading clean">
+              <div>
+                <p class="eyebrow">Baseline</p>
+                <h2>Without Self-Healing</h2>
+              </div>
+              <span class="panel-tag" id="baselineTag">waiting</span>
+            </div>
+            <div class="phone-demo" id="baselineExperience"></div>
+          </article>
+
+          <article class="experience-panel resilient-panel">
+            <div class="panel-heading clean">
+              <div>
+                <p class="eyebrow">Resilient</p>
+                <h2>With Autonomic Feed Ops</h2>
+              </div>
+              <span class="panel-tag" id="resilientTag">waiting</span>
+            </div>
+            <div class="phone-demo" id="resilientExperience"></div>
+          </article>
+
+          <aside class="agent-panel">
+            <div class="section-head compact">
+              <p class="eyebrow">System</p>
+              <h2>Agent View</h2>
+            </div>
+            <div class="mini-metrics compare-metrics" id="compareMetrics"></div>
+            <div class="agent-timeline spacious" id="compareTimeline"></div>
+          </aside>
+        </section>
+      </main>
+    </div>
+
+    <script src="/assets/compare.js"></script>
+  </body>
+</html>

@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Autonomic Feed Ops</title>
+    <link rel="icon" href="data:," />
     <link rel="stylesheet" href="/assets/styles.css" />
   </head>
   <body>
@@ -14,6 +15,18 @@
           <h1>Autonomic Feed Ops</h1>
         </div>
         <div class="topbar-actions">
+          <a class="button ghost" href="/social">
+            <span class="button-mark">U</span>
+            User App
+          </a>
+          <a class="button ghost" href="/compare">
+            <span class="button-mark">V</span>
+            Compare
+          </a>
+          <a class="button ghost" href="/lab">
+            <span class="button-mark">L</span>
+            Lab
+          </a>
           <div class="status-pill" id="globalStatus">
             <span class="status-dot pending"></span>
             <span>Connecting</span>
@@ -49,42 +62,31 @@
           <div class="panel action-panel">
             <div class="panel-heading">
               <div>
-                <p class="eyebrow">Failure lab</p>
-                <h3>Recovery Controls</h3>
+                <p class="eyebrow">Operator context</p>
+                <h3>Autonomic Feed Ops</h3>
               </div>
-              <span class="panel-tag">Local demo</span>
+              <span class="panel-tag">Recovery layer</span>
             </div>
-            <div class="action-grid">
-              <button class="button primary" id="seedButton" type="button">
-                <span class="button-mark">S</span>
-                Seed Data
-              </button>
-              <button class="button" id="postButton" type="button">
-                <span class="button-mark">P</span>
-                Create Post
-              </button>
-              <button class="button warning" id="redisButton" type="button">
-                <span class="button-mark">R</span>
-                Redis Outage
-              </button>
-              <button class="button" id="trafficButton" type="button">
-                <span class="button-mark">T</span>
-                Feed Traffic
-              </button>
-              <button class="button danger" id="feedCrashButton" type="button">
-                <span class="button-mark">F</span>
-                Feed Crash
-              </button>
-              <button class="button success" id="recoverButton" type="button">
-                <span class="button-mark">C</span>
-                Recover
-              </button>
-              <button class="button ghost" id="resetButton" type="button">
-                <span class="button-mark">X</span>
-                Reset Demo
-              </button>
+            <div class="ops-copy">
+              <p>
+                This cockpit shows the reliability layer: service health, feed path, incident detection,
+                and recovery actions. Intentional breakage lives in the neutral Scenario Lab.
+              </p>
             </div>
-            <div class="command-log" id="commandLog" aria-live="polite"></div>
+            <div class="action-grid nav-action-grid">
+              <a class="button primary" href="/social">
+                <span class="button-mark">U</span>
+                User App
+              </a>
+              <a class="button" href="/compare">
+                <span class="button-mark">V</span>
+                Compare
+              </a>
+              <a class="button warning" href="/lab">
+                <span class="button-mark">L</span>
+                Scenario Lab
+              </a>
+            </div>
           </div>
         </section>
 

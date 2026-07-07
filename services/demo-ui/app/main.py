@@ -34,6 +34,30 @@ SERVICE_PROBES = [
     {"id": "healing", "name": "Healing Agent", "url": HEALING_AGENT_URL, "kind": "Python controller"},
 ]
 
+HISTORY_CREATORS = [
+    ("rome_daily", "Ancient Rome Daily"),
+    ("archive_lens", "Archive Lens"),
+    ("medieval_maps", "Medieval Maps"),
+    ("space_race_room", "Space Race Room"),
+    ("revolution_notes", "Revolution Notes"),
+    ("artifact_lab", "Artifact Lab"),
+    ("cold_war_clips", "Cold War Clips"),
+    ("silk_road_stories", "Silk Road Stories"),
+]
+
+HISTORY_POSTS = [
+    "A Roman road was not just pavement. It was logistics, tax collection, troop movement, and empire maintenance in one artifact.",
+    "This 1520 map gets the coastline wrong, but the trade priorities exactly right. Cartography is a record of ambition.",
+    "The fastest way to read an archive photo is to ask what the photographer wanted outside the frame.",
+    "Medieval manuscript margins were sometimes the comment section of their day: jokes, corrections, and tiny rebellions.",
+    "The space race was not only rockets. It was checklists, rooms full of operators, and reliability under impossible pressure.",
+    "A museum object without provenance is a mystery with a display case. The metadata is part of the artifact.",
+    "Cold War infrastructure changed everyday life: radio towers, bunkers, school drills, and supply chains all carried the politics.",
+    "Silk Road history is less a single road than a protocol for exchange across languages, religions, and empires.",
+    "The first newspapers scaled trust and panic at the same time. Distribution changed society before algorithms did.",
+    "City walls tell you what people feared, where wealth moved, and how leaders expected conflict to arrive.",
+]
+
 app = FastAPI(title="Distributed Social Feed Demo UI", version="0.1.0")
 
 
@@ -61,6 +85,26 @@ async def shutdown() -> None:
 @app.get("/")
 async def index() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html")
+
+
+@app.get("/ops")
+async def ops() -> FileResponse:
+    return FileResponse(STATIC_DIR / "index.html")
+
+
+@app.get("/social")
+async def social() -> FileResponse:
+    return FileResponse(STATIC_DIR / "social.html")
+
+
+@app.get("/compare")
+async def compare() -> FileResponse:
+    return FileResponse(STATIC_DIR / "compare.html")
+
+
+@app.get("/lab")
+async def lab() -> FileResponse:
+    return FileResponse(STATIC_DIR / "lab.html")
 
 
 app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
@@ -124,7 +168,7 @@ async def list_users(limit: int = Query(default=40, ge=1, le=100)) -> list[dict[
             """
             SELECT id, username, display_name, created_at
             FROM users
-            ORDER BY created_at ASC
+            ORDER BY created_at DESC
             LIMIT $1
             """,
             limit,
@@ -136,6 +180,67 @@ async def list_users(limit: int = Query(default=40, ge=1, le=100)) -> list[dict[
 async def feed(user_id: str, limit: int = Query(default=12, ge=1, le=100)) -> dict[str, Any]:
     response = await app.state.http.get(f"{FEED_SERVICE_URL}/feeds/{user_id}", params={"limit": limit})
     return parse_service_response(response)
+
+
+@app.get("/api/social/experience")
+async def social_experience(
+    user_id: str | None = Query(default=None),
+    limit: int = Query(default=8, ge=1, le=20),
+) -> dict[str, Any]:
+    users, services, incidents, actions = await asyncio.gather(
+        list_users(limit=40),
+        service_status(),
+        list_incidents(limit=8),
+        recent_healing_actions(limit=8),
+    )
+    selected_user_id = user_id or (users[0]["id"] if users else None)
+    if selected_user_id is None:
+        return {
+            "users": [],
+            "selected_user": None,
+            "notifications": {"count": 0, "items": []},
+            "without_healing": empty_experience("seed demo data first"),
+            "with_healing": empty_experience("seed demo data first"),
+            "system": system_snapshot(services, incidents, actions, None),
+            "timeline": [{"state": "pending", "label": "Seed the social graph to start the demo."}],
+        }
+
+    feed_payload = await safe_feed(selected_user_id, limit)
+    feed_items = await enrich_feed_items(feed_payload.get("items", []))
+    notifications = await notification_summary(selected_user_id)
+    selected_user = next((user for user in users if user["id"] == selected_user_id), users[0] if users else None)
+    source = feed_payload.get("source", "unavailable")
+    feed_error = feed_payload.get("error")
+    snapshot = system_snapshot(services, incidents, actions, source)
+    outage_active = snapshot["redis_status"] != "ready" or snapshot["feed_status"] == "down"
+
+    with_healing = {
+        "label": "With Autonomic Feed Ops",
+        "status": "recovering" if feed_error else ("resilient" if source == "postgres_degraded" else "ready"),
+        "source": source,
+        "load_ms": 420 if source == "postgres_degraded" else 96,
+        "message": resilient_message(source, feed_error),
+        "items": feed_items,
+    }
+
+    without_healing = {
+        "label": "Without self-healing",
+        "status": "failed" if outage_active else "ready",
+        "source": "redis_only" if outage_active else source,
+        "load_ms": 9200 if outage_active else 108,
+        "message": baseline_message(outage_active, snapshot["redis_status"], snapshot["feed_status"]),
+        "items": [] if outage_active else feed_items,
+    }
+
+    return {
+        "users": users,
+        "selected_user": selected_user,
+        "notifications": notifications,
+        "without_healing": without_healing,
+        "with_healing": with_healing,
+        "system": snapshot,
+        "timeline": build_experience_timeline(snapshot, incidents, actions, source),
+    }
 
 
 @app.get("/api/incidents")
@@ -174,8 +279,8 @@ async def seed_demo_data() -> dict[str, Any]:
         response = await app.state.http.post(
             f"{USER_SERVICE_URL}/users",
             json={
-                "username": f"{prefix}_{index:02d}",
-                "display_name": f"Demo User {index + 1}",
+                "username": f"{prefix}_{HISTORY_CREATORS[index % len(HISTORY_CREATORS)][0]}_{index:02d}",
+                "display_name": HISTORY_CREATORS[index % len(HISTORY_CREATORS)][1],
             },
         )
         created_users.append(parse_service_response(response))
@@ -192,7 +297,7 @@ async def seed_demo_data() -> dict[str, Any]:
             f"{POST_SERVICE_URL}/posts",
             json={
                 "author_id": author_id,
-                "content": f"Reliability demo post {index + 1:02d} from {author_id[-6:]}",
+                "content": HISTORY_POSTS[index % len(HISTORY_POSTS)],
             },
         )
 
@@ -334,6 +439,183 @@ async def set_consumer_paused(paused: bool) -> dict[str, Any]:
         json={"paused": paused},
     )
     return parse_service_response(response)
+
+
+async def safe_feed(user_id: str, limit: int) -> dict[str, Any]:
+    try:
+        response = await app.state.http.get(f"{FEED_SERVICE_URL}/feeds/{user_id}", params={"limit": limit})
+        return parse_service_response(response)
+    except Exception as exc:
+        return {"user_id": user_id, "source": "unavailable", "items": [], "error": str(exc)}
+
+
+async def enrich_feed_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    if not items:
+        return []
+    author_ids = sorted({item.get("author_id") for item in items if item.get("author_id")})
+    if not author_ids:
+        return items
+    async with app.state.pool.acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT id, username, display_name
+            FROM users
+            WHERE id = ANY($1::text[])
+            """,
+            author_ids,
+        )
+    authors = {row["id"]: serialize_record(row) for row in rows}
+    enriched = []
+    for index, item in enumerate(items):
+        author = authors.get(item.get("author_id"), {})
+        enriched.append(
+            {
+                **item,
+                "author": {
+                    "id": item.get("author_id"),
+                    "display_name": author.get("display_name", "Unknown Creator"),
+                    "username": author.get("username", "unknown"),
+                },
+                "media_index": index % 6,
+            }
+        )
+    return enriched
+
+
+async def notification_summary(user_id: str) -> dict[str, Any]:
+    async with app.state.pool.acquire() as conn:
+        count = await conn.fetchval("SELECT count(*) FROM notifications WHERE user_id = $1", user_id)
+        rows = await conn.fetch(
+            """
+            SELECT n.id, n.type, n.created_at, u.display_name AS actor_name
+            FROM notifications n
+            JOIN users u ON u.id = n.actor_id
+            WHERE n.user_id = $1
+            ORDER BY n.created_at DESC
+            LIMIT 5
+            """,
+            user_id,
+        )
+    return {"count": int(count or 0), "items": [serialize_record(row) for row in rows]}
+
+
+async def recent_healing_actions(limit: int = 8) -> list[dict[str, Any]]:
+    async with app.state.pool.acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT
+              ha.id,
+              ha.incident_id,
+              ha.action_type,
+              ha.target,
+              ha.status,
+              ha.details,
+              ha.started_at,
+              ha.completed_at,
+              hi.type AS incident_type
+            FROM healing_actions ha
+            JOIN healing_incidents hi ON hi.id = ha.incident_id
+            ORDER BY ha.started_at DESC
+            LIMIT $1
+            """,
+            limit,
+        )
+    return [serialize_record(row) for row in rows]
+
+
+def empty_experience(message: str) -> dict[str, Any]:
+    return {
+        "label": "Feed experience",
+        "status": "pending",
+        "source": "none",
+        "load_ms": 0,
+        "message": message,
+        "items": [],
+    }
+
+
+def system_snapshot(
+    services: list[dict[str, Any]],
+    incidents: list[dict[str, Any]],
+    actions: list[dict[str, Any]],
+    source: str | None,
+) -> dict[str, Any]:
+    feed = next((service for service in services if service["id"] == "feed"), None)
+    redis_status = "unknown"
+    feed_status = "unknown"
+    if feed:
+        feed_status = normalize_service_status(feed.get("status"))
+        detail = feed.get("detail")
+        if isinstance(detail, dict):
+            redis_status = detail.get("redis", "unknown")
+    return {
+        "services_ready": sum(1 for service in services if normalize_service_status(service.get("status")) == "ready"),
+        "services_total": len(services),
+        "redis_status": redis_status,
+        "feed_status": feed_status,
+        "feed_source": source or "unknown",
+        "incidents": incidents,
+        "actions": actions,
+    }
+
+
+def build_experience_timeline(
+    snapshot: dict[str, Any],
+    incidents: list[dict[str, Any]],
+    actions: list[dict[str, Any]],
+    source: str | None,
+) -> list[dict[str, str]]:
+    timeline: list[dict[str, str]] = []
+    if snapshot["redis_status"] == "ready" and snapshot["feed_status"] == "ready":
+        timeline.append({"state": "ready", "label": "Feed cache is healthy and serving the fast path."})
+    if snapshot["redis_status"] != "ready":
+        timeline.append({"state": "danger", "label": "Redis cache outage detected in the feed path."})
+    if source == "postgres_degraded":
+        timeline.append({"state": "resilient", "label": "Feed requests are being served from Postgres fallback."})
+    for incident in incidents:
+        if incident.get("type") in {"redis_outage", "service_down", "consumer_lag"}:
+            timeline.append(
+                {
+                    "state": "resilient" if incident.get("status") == "resolved" else "danger",
+                    "label": f"Agent recorded {incident.get('type')} on {incident.get('service')}.",
+                }
+            )
+    for action in actions:
+        timeline.append(
+            {
+                "state": "ready" if action.get("status") == "success" else "danger",
+                "label": f"Action {action.get('action_type')} for {action.get('target')} ended {action.get('status')}.",
+            }
+        )
+    if not timeline:
+        timeline.append({"state": "pending", "label": "Waiting for demo traffic or a failure injection."})
+    return timeline[:6]
+
+
+def baseline_message(outage_active: bool, redis_status: str, feed_status: str) -> str:
+    if feed_status == "down":
+        return "The feed service is unavailable, so the user sees a broken timeline."
+    if outage_active or redis_status != "ready":
+        return "A Redis-only feed path stalls because the cache cannot answer."
+    return "The fast cache path is healthy, so the feed feels normal."
+
+
+def resilient_message(source: str, error: str | None) -> str:
+    if error:
+        return "The app is waiting for the agent to restore the feed service."
+    if source == "postgres_degraded":
+        return "The app is in resilient mode and serving from Postgres fallback."
+    if source == "redis":
+        return "The app is on the fast Redis materialized feed path."
+    return "The app is loading the best available feed path."
+
+
+def normalize_service_status(status: Any) -> str:
+    if status in {"ready", "ok"}:
+        return "ready"
+    if status in {"down", "failed"}:
+        return "down"
+    return "degraded"
 
 
 async def docker_action(target: str, action: str) -> dict[str, Any]:
