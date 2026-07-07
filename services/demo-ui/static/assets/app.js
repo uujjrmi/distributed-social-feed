@@ -21,6 +21,7 @@ const els = {
   trafficButton: document.querySelector("#trafficButton"),
   feedCrashButton: document.querySelector("#feedCrashButton"),
   recoverButton: document.querySelector("#recoverButton"),
+  resetButton: document.querySelector("#resetButton"),
 };
 
 const actionButtons = [
@@ -30,6 +31,7 @@ const actionButtons = [
   els.trafficButton,
   els.feedCrashButton,
   els.recoverButton,
+  els.resetButton,
 ];
 
 async function api(path, options = {}) {
@@ -283,6 +285,7 @@ els.redisButton.addEventListener("click", () => runAction("redis outage", "/api/
 els.trafficButton.addEventListener("click", () => runAction("feed traffic", "/api/actions/traffic"));
 els.feedCrashButton.addEventListener("click", () => runAction("feed crash", "/api/actions/feed-crash"));
 els.recoverButton.addEventListener("click", () => runAction("recover", "/api/actions/recover"));
+els.resetButton.addEventListener("click", () => runAction("reset demo", "/api/actions/reset-demo"));
 
 log("cockpit online");
 refresh();

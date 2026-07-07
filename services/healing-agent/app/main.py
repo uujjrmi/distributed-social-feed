@@ -18,6 +18,7 @@ from .policy import PolicyEngine
 SERVICE = "healing-agent"
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://app:app@postgres:5432/social")
 PROMETHEUS_URL = os.getenv("PROMETHEUS_URL", "http://prometheus:9090")
+ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "dev-admin-token")
 POLL_INTERVAL = int(os.getenv("HEALING_POLL_INTERVAL_SECONDS", "10"))
 CONFIDENCE_THRESHOLD = float(os.getenv("HEALING_CONFIDENCE_THRESHOLD", "0.75"))
 COOLDOWN_SECONDS = int(os.getenv("HEALING_COOLDOWN_SECONDS", "120"))
@@ -102,6 +103,14 @@ async def get_incident(incident_id: str) -> dict[str, Any]:
     return incident
 
 
+@app.delete("/incidents")
+async def clear_incidents(request: Request) -> dict[str, Any]:
+    if request.headers.get("x-admin-token") != ADMIN_TOKEN:
+        raise HTTPException(status_code=401, detail="invalid admin token")
+    deleted = await app.state.store.clear_incidents()
+    return {"status": "cleared", "deleted": deleted}
+
+
 async def healing_loop() -> None:
     while True:
         try:
@@ -157,4 +166,3 @@ async def handle_candidate(candidate) -> None:
     final_status = "resolved" if result.status == "success" else "action_failed"
     await app.state.store.complete_incident(incident_id, final_status)
     INCIDENTS.labels(candidate.service, candidate.incident_type, candidate.severity, final_status).inc()
-

@@ -1,6 +1,10 @@
 # Distributed Social Feed with AI Self-Healing
 
+[![CI](https://github.com/uujjrmi/distributed-social-feed/actions/workflows/ci.yml/badge.svg)](https://github.com/uujjrmi/distributed-social-feed/actions/workflows/ci.yml)
+
 Distributed backend demo for a social feed with Kafka event streaming, Redis feed caching, Prometheus metrics, failure injection, an autonomous healing agent, and a live demo cockpit.
+
+![Autonomic Feed Ops demo cockpit](docs/assets/demo-cockpit.png)
 
 ## Why This Exists
 
@@ -44,6 +48,18 @@ http://localhost:8080
 
 The UI includes live service health, social graph counts, feed preview, incident timeline, sample data generation, failure injection, feed traffic generation, and recovery controls.
 
+For a guided recording flow:
+
+```bash
+make demo
+```
+
+To clear incident history and restore demo controls:
+
+```bash
+make reset-demo
+```
+
 Grafana is optional in Compose to keep the core stack lighter:
 
 ```bash
@@ -73,12 +89,13 @@ Grafana credentials default to `admin` / `admin`.
 ## Demo Flow
 
 ```bash
-make seed
-make load-smoke
-make fail-redis
+make demo
 ```
 
 Or use the Demo UI at http://localhost:8080 to seed sample data, create posts, inject a Redis outage, generate feed traffic, and recover services.
+
+For a 90-second recording outline, see [docs/demo-script.md](docs/demo-script.md).
+For the latest local resilience run, see [docs/benchmark-results.md](docs/benchmark-results.md).
 
 Watch the Healing Agent:
 

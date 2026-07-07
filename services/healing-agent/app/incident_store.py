@@ -115,3 +115,7 @@ class IncidentStore:
         data["actions"] = [dict(row) for row in actions]
         return data
 
+    async def clear_incidents(self) -> int:
+        async with self.pool.acquire() as conn:
+            result = await conn.execute("DELETE FROM healing_incidents")
+        return int(result.split()[-1])

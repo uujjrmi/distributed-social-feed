@@ -253,6 +253,17 @@ async def recover() -> dict[str, Any]:
     return {"status": "recovered", "containers": containers, "degraded": degraded, "consumer": paused}
 
 
+@app.post("/api/actions/reset-demo")
+async def reset_demo() -> dict[str, Any]:
+    recovered = await recover()
+    response = await app.state.http.delete(
+        f"{HEALING_AGENT_URL}/incidents",
+        headers={"x-admin-token": ADMIN_TOKEN},
+    )
+    cleared = parse_service_response(response)
+    return {"status": "reset", "recovery": recovered, "incidents": cleared}
+
+
 @app.post("/api/actions/degraded-mode")
 async def degraded_mode(body: DegradedModeRequest) -> dict[str, Any]:
     return await set_feed_degraded_mode(body.enabled)
@@ -336,9 +347,11 @@ def _docker_action_sync(target: str, action: str) -> dict[str, Any]:
         raise RuntimeError(f"no container matched {target}")
     container = sorted(candidates, key=lambda item: len(item.name))[0]
     if action == "stop":
-        container.stop(timeout=10)
+        if container.status == "running":
+            container.stop(timeout=10)
     elif action == "start":
-        container.start()
+        if container.status != "running":
+            container.start()
     else:
         raise RuntimeError(f"unsupported docker action {action}")
     container.reload()

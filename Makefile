@@ -1,4 +1,4 @@
-.PHONY: up down logs seed smoke smoke-ui load-smoke fail-redis fail-feed fail-notifications recover fmt
+.PHONY: up down logs seed smoke smoke-ui demo reset-demo load-smoke fail-redis fail-feed fail-notifications recover fmt
 
 up:
 	docker compose up --build
@@ -22,6 +22,12 @@ smoke:
 smoke-ui:
 	curl -fsS http://localhost:8080/api/healthz
 	curl -fsS http://localhost:8080/api/overview
+
+demo:
+	./scripts/demo.sh
+
+reset-demo:
+	./scripts/reset_demo.sh
 
 load-smoke:
 	k6 run load/k6-mixed.js

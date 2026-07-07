@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate Compose file
+        run: docker compose config
+
+      - name: Compile Python services
+        run: |
+          python -m py_compile \
+            services/user-service/app/main.py \
+            services/notification-service/app/main.py \
+            services/healing-agent/app/*.py \
+            services/demo-ui/app/main.py
+
+      - name: Build service images
+        run: |
+          docker compose build \
+            user-service \
+            post-service \
+            feed-service \
+            notification-service \
+            healing-agent \
+            demo-ui
