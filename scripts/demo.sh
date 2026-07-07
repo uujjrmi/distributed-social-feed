@@ -68,7 +68,7 @@ log "Creating a live post and warm feed traffic"
 user_id="$(curl -fsS "${DEMO_URL}/api/users?limit=1" | json_value "data[0]['id']")"
 curl -fsS -X POST "${DEMO_URL}/api/actions/post" \
   -H "content-type: application/json" \
-  -d "{\"author_id\":\"${user_id}\",\"content\":\"Palantir demo post: the feed stays useful while infra fails.\"}" \
+  -d "{\"author_id\":\"${user_id}\",\"content\":\"Reliability demo post: the feed stays useful while infra fails.\"}" \
   | python3 -m json.tool
 curl -fsS -X POST "${DEMO_URL}/api/actions/traffic" | python3 -m json.tool
 

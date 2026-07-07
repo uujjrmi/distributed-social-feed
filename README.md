@@ -94,7 +94,6 @@ make demo
 
 Or use the Demo UI at http://localhost:8080 to seed sample data, create posts, inject a Redis outage, generate feed traffic, and recover services.
 
-For a 90-second recording outline, see [docs/demo-script.md](docs/demo-script.md).
 For the latest local resilience run, see [docs/benchmark-results.md](docs/benchmark-results.md).
 
 Watch the Healing Agent:
