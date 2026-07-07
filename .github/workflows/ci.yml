@@ -28,6 +28,13 @@ jobs:
             services/healing-agent/app/*.py \
             services/demo-ui/app/main.py
 
+      - name: Check demo UI JavaScript
+        run: |
+          node --check services/demo-ui/static/assets/app.js
+          node --check services/demo-ui/static/assets/social.js
+          node --check services/demo-ui/static/assets/compare.js
+          node --check services/demo-ui/static/assets/lab.js
+
       - name: Build service images
         run: |
           docker compose build \
